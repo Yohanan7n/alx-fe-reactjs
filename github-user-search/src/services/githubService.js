@@ -10,7 +10,7 @@ const GITHUB_SEARCH_API_URL = 'https://api.github.com/search/users?q';
  * @param {string} [params.location] - The location to filter by.
  * @param {string} [params.minRepos] - The minimum number of public repositories.
  * @param {string} [params.url] - The full URL for the next page of results (for pagination).
- * @returns {Promise<{items: object[], nextPageLink: string|null}>} - A promise that resolves to an object containing the search results and a link to the next page, or null if no next page exists.
+ * @returns {Promise<{items: object[], nextPageLink: string|null}>} - Search results and a link to the next page, or null if no next page exists.
  */
 export const searchUsers = async ({ username, location, minRepos, url = null }) => {
   try {
@@ -24,11 +24,9 @@ export const searchUsers = async ({ username, location, minRepos, url = null }) 
         query += username;
       }
       if (location) {
-        // The GitHub API uses the format 'location:value' for filtering
         query += `+location:${location}`;
       }
       if (minRepos) {
-        // The GitHub API uses 'repos:>=number' for repository count filtering
         query += `+repos:>=${minRepos}`;
       }
 
@@ -36,14 +34,12 @@ export const searchUsers = async ({ username, location, minRepos, url = null }) 
         throw new Error('Please enter at least one search criterion.');
       }
 
-      // Construct the full API URL with the query and set per_page for pagination
-      requestUrl = `${GITHUB_SEARCH_API_URL}?q=${query}&per_page=30`;
+      requestUrl = `${GITHUB_SEARCH_API_URL}=${query}&per_page=30`;
     }
 
     const response = await axios.get(requestUrl);
 
-    // Extract next page link from the response headers for pagination
-    // The link header is a string that contains links to different pages of results
+    // Extract next page link from the response headers
     let nextPageLink = null;
     const linkHeader = response.headers.link;
     if (linkHeader) {
@@ -59,17 +55,32 @@ export const searchUsers = async ({ username, location, minRepos, url = null }) 
     };
   } catch (error) {
     if (error.response) {
-      // Handle specific HTTP error status codes from the API
       if (error.response.status === 403) {
         console.error('API Rate Limit Exceeded:', error.response.data.message);
         throw new Error('API rate limit exceeded. Please try again later.');
       }
       if (error.response.status === 422) {
-         console.error('Validation Failed:', error.response.data.message);
-         throw new Error('Invalid search criteria. Please check your input.');
+        console.error('Validation Failed:', error.response.data.message);
+        throw new Error('Invalid search criteria. Please check your input.');
       }
     }
-    // Re-throw the error for the component to handle
+    throw error;
+  }
+};
+
+/**
+ * Fetches a single GitHub user's profile data.
+ * @param {string} username - The GitHub username to fetch.
+ * @returns {Promise<object>} - The user's profile data.
+ */
+export const fetchUserData = async (username) => {
+  try {
+    const response = await axios.get(`https://api.github.com/users/${username}`);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      throw new Error('User not found');
+    }
     throw error;
   }
 };
