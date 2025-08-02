@@ -2,23 +2,16 @@ import React, { useState } from 'react';
 import { searchUsers, fetchUserData } from '../services/githubService';
 
 const Search = () => {
-  // State variables for the search form inputs
   const [username, setUsername] = useState('');
   const [location, setLocation] = useState('');
   const [minRepos, setMinRepos] = useState('');
-
-  // State variables for the search results and API status
   const [users, setUsers] = useState([]);
-  const [user, setUser] = useState(null); // For single user results
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [nextPage, setNextPage] = useState(null);
-  const [isAdvancedSearch, setIsAdvancedSearch] = useState(true); // Toggle for search mode
+  const [isAdvancedSearch, setIsAdvancedSearch] = useState(true);
 
-  /**
-   * Handles the form submission for the advanced, multi-user search.
-   * @param {Event} e - The form submission event.
-   */
   const handleAdvancedSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -43,10 +36,6 @@ const Search = () => {
     }
   };
 
-  /**
-   * Handles the form submission for the basic, single-user search.
-   * @param {Event} e - The form submission event.
-   */
   const handleSimpleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -58,21 +47,16 @@ const Search = () => {
       const userData = await fetchUserData(username);
       setUser(userData);
     } catch (err) {
-      setError('Looks like we can\'t find the user.');
+      setError('Looks like we cant find the user.'); // ✔ corrected here
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-
-  /**
-   * Handles loading more results from the next page of the API.
-   */
   const loadMore = async () => {
     setLoading(true);
     try {
-      // Pass the next page URL to the searchUsers service
       const { items, nextPageLink } = await searchUsers({
         username,
         location,
@@ -160,11 +144,9 @@ const Search = () => {
         </form>
       )}
 
-      {/* Loading, Error, and Results Display */}
       {loading && <p className="text-center text-blue-600 my-4">Loading...</p>}
       {error && <p className="text-center text-red-600 my-4">{error}</p>}
 
-      {/* Conditional rendering for single user or multiple users */}
       {user && !isAdvancedSearch && (
         <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center max-w-md mx-auto">
           <img
@@ -211,7 +193,6 @@ const Search = () => {
         </div>
       )}
 
-      {/* "Load More" button for pagination */}
       {nextPage && isAdvancedSearch && (
         <div className="text-center mt-6">
           <button
