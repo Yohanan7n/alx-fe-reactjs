@@ -1,0 +1,17 @@
+/*
+  This file imports the base, components, and utilities from Tailwind CSS.
+  It is the main entry point for the application's global styles.
+*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Set a default font-family and a light background color for the entire page.
+  The `text-gray-800` class from Tailwind will handle the text color.
+*/
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f3f4f6; /* A very light gray background */
+}
